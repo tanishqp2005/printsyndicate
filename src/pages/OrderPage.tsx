@@ -12,6 +12,15 @@ import PaymentForm from '@/components/PaymentForm';
 import OrderProgress from '@/components/OrderProgress';
 import OrderConfirmation from '@/components/OrderConfirmation';
 
+// Define the PrintOptions type to ensure consistent usage
+export type PrintOptions = {
+  copies: string;
+  color: 'bw' | 'color';
+  doubleSided: 'single' | 'double';
+  pageSize: 'a4' | 'a3' | 'letter';
+  binding: 'none' | 'staple' | 'spiral';
+};
+
 const formSchema = z.object({
   fullName: z.string().min(3),
   email: z.string().email(),
@@ -37,13 +46,13 @@ const OrderPage = () => {
   const [totalPrice, setTotalPrice] = useState(0);
   const [orderNumber, setOrderNumber] = useState('');
 
-  // Define default print options - making sure ALL properties are non-optional
-  const defaultPrintOptions = {
+  // Define default print options with all required properties
+  const defaultPrintOptions: PrintOptions = {
     copies: '1',
-    color: 'bw' as const,
-    doubleSided: 'single' as const,
-    pageSize: 'a4' as const,
-    binding: 'none' as const,
+    color: 'bw',
+    doubleSided: 'single',
+    pageSize: 'a4',
+    binding: 'none',
   };
 
   const handleFileSelect = (file: File) => {
