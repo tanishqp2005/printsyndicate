@@ -37,7 +37,7 @@ const OrderPage = () => {
   const [totalPrice, setTotalPrice] = useState(0);
   const [orderNumber, setOrderNumber] = useState('');
 
-  // Define default print options
+  // Define default print options - making sure ALL properties are non-optional
   const defaultPrintOptions = {
     copies: '1',
     color: 'bw' as const,
