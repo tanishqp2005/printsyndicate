@@ -37,6 +37,15 @@ const OrderPage = () => {
   const [totalPrice, setTotalPrice] = useState(0);
   const [orderNumber, setOrderNumber] = useState('');
 
+  // Define default print options
+  const defaultPrintOptions = {
+    copies: '1',
+    color: 'bw' as const,
+    doubleSided: 'single' as const,
+    pageSize: 'a4' as const,
+    binding: 'none' as const,
+  };
+
   const handleFileSelect = (file: File) => {
     setSelectedFile(file);
     setTimeout(() => {
@@ -124,13 +133,7 @@ const OrderPage = () => {
                       <OrderSummary
                         fileName={selectedFile.name}
                         fileSize={selectedFile.size}
-                        printOptions={{
-                          copies: '1',
-                          color: 'bw',
-                          doubleSided: 'single',
-                          pageSize: 'a4',
-                          binding: 'none',
-                        }}
+                        printOptions={defaultPrintOptions}
                         totalPrice={3.50}
                       />
                     </div>

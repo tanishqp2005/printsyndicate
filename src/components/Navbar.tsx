@@ -11,20 +11,6 @@ const Navbar = () => {
           <Printer className="h-6 w-6 text-university-700" />
           <span className="font-bold text-xl text-university-900">PrintSyndicate</span>
         </Link>
-        <nav className="hidden md:flex items-center gap-6">
-          <Link to="/" className="text-gray-700 hover:text-university-600 transition-colors">
-            Home
-          </Link>
-          <Link to="/pricing" className="text-gray-700 hover:text-university-600 transition-colors">
-            Pricing
-          </Link>
-          <Link to="/faq" className="text-gray-700 hover:text-university-600 transition-colors">
-            FAQ
-          </Link>
-          <Link to="/contact" className="text-gray-700 hover:text-university-600 transition-colors">
-            Contact
-          </Link>
-        </nav>
         <div className="flex gap-3">
           <Link
             to="/order"
