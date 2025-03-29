@@ -12,9 +12,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
-import { cn } from '@/lib/utils';
 
 interface PaymentFormProps {
   onSubmit: () => void;
@@ -23,7 +20,6 @@ interface PaymentFormProps {
 const PaymentForm: React.FC<PaymentFormProps> = ({ onSubmit }) => {
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'cash'>('card');
   const [loading, setLoading] = useState(false);
-  const [open, setOpen] = useState(false);
   const [paymentLocation, setPaymentLocation] = useState("");
 
   const locations = [
@@ -55,10 +51,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ onSubmit }) => {
             type="button"
             variant={paymentMethod === 'card' ? 'default' : 'outline'}
             onClick={() => setPaymentMethod('card')}
-            className={cn(
-              paymentMethod === 'card' ? 'bg-university-600 hover:bg-university-700' : '',
-              'flex-1'
-            )}
+            className={`flex-1 ${paymentMethod === 'card' ? 'bg-university-600 hover:bg-university-700' : ''}`}
           >
             <CreditCard className="mr-2 h-4 w-4" />
             Credit Card
@@ -68,10 +61,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ onSubmit }) => {
             type="button"
             variant={paymentMethod === 'cash' ? 'default' : 'outline'}
             onClick={() => setPaymentMethod('cash')}
-            className={cn(
-              paymentMethod === 'cash' ? 'bg-university-600 hover:bg-university-700' : '',
-              'flex-1'
-            )}
+            className={`flex-1 ${paymentMethod === 'cash' ? 'bg-university-600 hover:bg-university-700' : ''}`}
           >
             Cash on Delivery
           </Button>
@@ -134,47 +124,18 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ onSubmit }) => {
           <CardContent className="pt-6 space-y-4">
             <div className="space-y-2">
               <Label>Payment Location</Label>
-              <Popover open={open} onOpenChange={setOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={open}
-                    className="w-full justify-between"
-                  >
-                    {paymentLocation
-                      ? locations.find((location) => location.value === paymentLocation)?.label
-                      : "Select location..."}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-full p-0">
-                  <Command>
-                    <CommandInput placeholder="Search location..." />
-                    <CommandEmpty>No location found.</CommandEmpty>
-                    <CommandGroup>
-                      {locations.map((location) => (
-                        <CommandItem
-                          key={location.value}
-                          value={location.value}
-                          onSelect={(currentValue) => {
-                            setPaymentLocation(currentValue === paymentLocation ? "" : currentValue)
-                            setOpen(false)
-                          }}
-                        >
-                          <Check
-                            className={cn(
-                              "mr-2 h-4 w-4",
-                              paymentLocation === location.value ? "opacity-100" : "opacity-0"
-                            )}
-                          />
-                          {location.label}
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </Command>
-                </PopoverContent>
-              </Popover>
+              <Select onValueChange={setPaymentLocation} value={paymentLocation}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select location..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {locations.map((location) => (
+                    <SelectItem key={location.value} value={location.value}>
+                      {location.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <p className="text-sm text-gray-500 mt-2">
                 You will pay when collecting your printouts.
               </p>
