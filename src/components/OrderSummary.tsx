@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Printer, Copy, Palette, Layers, FileText, BookOpen } from 'lucide-react';
+import { Printer, Copy, Palette, Layers, FileText, BookOpen, Files } from 'lucide-react';
 
 interface PrintOptions {
   copies: string;
@@ -11,23 +11,28 @@ interface PrintOptions {
   binding: 'none' | 'staple' | 'spiral';
 }
 
-interface OrderSummaryProps {
+interface FileDetail {
   fileName: string;
   fileSize: number;
-  pageCount?: number;
+  pageCount: number;
+}
+
+interface OrderSummaryProps {
+  files: FileDetail[];
   printOptions: PrintOptions;
   totalPrice: number;
 }
 
 const OrderSummary: React.FC<OrderSummaryProps> = ({ 
-  fileName, 
-  fileSize, 
-  pageCount = 0, 
+  files, 
   printOptions, 
   totalPrice 
 }) => {
+  // Calculate total page count
+  const totalPageCount = files.reduce((total, file) => total + file.pageCount, 0);
+  
   // Calculate per page cost
-  const perPageCost = pageCount > 0 ? (pageCount * 2).toFixed(2) : '0.00';
+  const perPageCost = totalPageCount > 0 ? (totalPageCount * 2).toFixed(2) : '0.00';
 
   return (
     <Card>
@@ -38,16 +43,30 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
         <div>
           <h4 className="text-sm font-medium text-gray-500 mb-2">Document Details</h4>
           <div className="space-y-2">
-            <div className="flex items-start">
-              <FileText className="h-5 w-5 text-university-600 mr-3" />
-              <div>
-                <p className="text-sm font-medium line-clamp-1">{fileName}</p>
-                <p className="text-xs text-gray-500">
-                  {(fileSize / 1024 / 1024).toFixed(2)} MB
-                  {pageCount > 0 && ` • ${pageCount} pages`}
-                </p>
+            {files.map((file, index) => (
+              <div key={index} className="flex items-start">
+                <FileText className="h-5 w-5 text-university-600 mr-3 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium line-clamp-1">{file.fileName}</p>
+                  <p className="text-xs text-gray-500">
+                    {(file.fileSize / 1024 / 1024).toFixed(2)} MB
+                    {file.pageCount > 0 && ` • ${file.pageCount} pages`}
+                  </p>
+                </div>
               </div>
-            </div>
+            ))}
+            
+            {files.length > 1 && (
+              <div className="flex items-center pt-2 border-t border-dashed border-gray-200 mt-2">
+                <Files className="h-5 w-5 text-university-600 mr-3" />
+                <div>
+                  <p className="text-sm font-medium">Total: {files.length} files</p>
+                  <p className="text-xs text-gray-500">
+                    {totalPageCount} pages in total
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -94,9 +113,9 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
         </div>
         
         <div className="border-t border-gray-200 pt-4">
-          {pageCount > 0 && (
+          {totalPageCount > 0 && (
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm text-gray-600">Page Cost (₹2 per page × {pageCount})</span>
+              <span className="text-sm text-gray-600">Page Cost (₹2 per page × {totalPageCount})</span>
               <span className="text-sm">₹{perPageCost}</span>
             </div>
           )}
@@ -125,7 +144,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
                 Additional Copies (×{parseInt(printOptions.copies) - 1})
               </span>
               <span className="text-sm">
-                ₹{((parseInt(printOptions.copies) - 1) * (pageCount > 0 ? pageCount * 2 : 3.50)).toFixed(2)}
+                ₹{((parseInt(printOptions.copies) - 1) * (totalPageCount > 0 ? totalPageCount * 2 : 3.50)).toFixed(2)}
               </span>
             </div>
           )}

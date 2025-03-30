@@ -21,6 +21,13 @@ export type PrintOptions = {
   binding: 'none' | 'staple' | 'spiral';
 };
 
+// Define the FileDetail type
+interface FileDetail {
+  fileName: string;
+  fileSize: number;
+  pageCount: number;
+}
+
 const formSchema = z.object({
   fullName: z.string().min(3),
   email: z.string().email(),
@@ -41,11 +48,11 @@ type FormValues = z.infer<typeof formSchema>;
 const OrderPage = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [fileDetails, setFileDetails] = useState<FileDetail[]>([]);
   const [orderDetails, setOrderDetails] = useState<FormValues | null>(null);
   const [totalPrice, setTotalPrice] = useState(0);
   const [orderNumber, setOrderNumber] = useState('');
-  const [pageCount, setPageCount] = useState(10); // Simulated page count (in a real app, this would be extracted from the PDF)
 
   // Define default print options with all required properties
   const defaultPrintOptions: PrintOptions = {
@@ -56,22 +63,39 @@ const OrderPage = () => {
     binding: 'none',
   };
 
-  const handleFileSelect = (file: File) => {
-    setSelectedFile(file);
+  const handleFilesSelect = (files: File[]) => {
+    setSelectedFiles(files);
     
-    // Simulate calculating page count from the file
-    // In a real application, you would use a PDF library to extract this information
-    const estimatedPageCount = Math.floor(file.size / 40000); // Rough estimate
-    setPageCount(Math.max(1, estimatedPageCount));
+    // Process each file to calculate page count
+    const details = files.map(file => {
+      // Simulate calculating page count from the file size
+      // In a real application, you would use a PDF library to extract this information
+      const estimatedPageCount = Math.floor(file.size / 40000); // Rough estimate
+      
+      return {
+        fileName: file.name,
+        fileSize: file.size,
+        pageCount: Math.max(1, estimatedPageCount)
+      };
+    });
     
-    setTimeout(() => {
-      setStep(2);
-    }, 500);
+    setFileDetails(details);
+    
+    if (files.length > 0) {
+      setTimeout(() => {
+        setStep(2);
+      }, 500);
+    } else {
+      setStep(1);
+    }
   };
 
   const calculatePrice = (details: FormValues) => {
+    // Calculate total page count
+    const totalPageCount = fileDetails.reduce((total, file) => total + file.pageCount, 0);
+    
     // Base price calculated at 2 rupees per page
-    let price = pageCount * 2;
+    let price = totalPageCount * 2;
     
     // Add color printing price
     if (details.printOptions.color === 'color') {
@@ -99,10 +123,11 @@ const OrderPage = () => {
     
     // Simulate sending email to stationery operator
     console.log('Sending order details to stationery operator:', {
-      file: selectedFile,
+      files: selectedFiles,
+      fileDetails: fileDetails,
       details: data,
       price: price,
-      pageCount: pageCount
+      totalPageCount: fileDetails.reduce((total, file) => total + file.pageCount, 0)
     });
   };
 
@@ -132,15 +157,15 @@ const OrderPage = () => {
             <div className="mt-8">
               {step === 1 && (
                 <div>
-                  <h1 className="text-2xl font-bold mb-6">Upload Your Document</h1>
+                  <h1 className="text-2xl font-bold mb-6">Upload Your Documents</h1>
                   <p className="text-gray-600 mb-6">
-                    Please upload the PDF document you want to print. We accept files up to 20MB in size.
+                    Please upload the PDF documents you want to print. We accept files up to 20MB in size each.
                   </p>
-                  <FileUpload onFileSelect={handleFileSelect} />
+                  <FileUpload onFilesSelect={handleFilesSelect} />
                 </div>
               )}
               
-              {step === 2 && selectedFile && (
+              {step === 2 && selectedFiles.length > 0 && (
                 <div>
                   <h1 className="text-2xl font-bold mb-6">Order Details</h1>
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -149,8 +174,7 @@ const OrderPage = () => {
                     </div>
                     <div>
                       <OrderSummary
-                        fileName={selectedFile.name}
-                        fileSize={selectedFile.size}
+                        files={fileDetails}
                         printOptions={defaultPrintOptions}
                         totalPrice={3.50}
                       />
@@ -159,7 +183,7 @@ const OrderPage = () => {
                 </div>
               )}
               
-              {step === 3 && selectedFile && orderDetails && (
+              {step === 3 && selectedFiles.length > 0 && orderDetails && (
                 <div>
                   <h1 className="text-2xl font-bold mb-6">Payment</h1>
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -168,8 +192,7 @@ const OrderPage = () => {
                     </div>
                     <div>
                       <OrderSummary
-                        fileName={selectedFile.name}
-                        fileSize={selectedFile.size}
+                        files={fileDetails}
                         printOptions={orderDetails.printOptions as PrintOptions}
                         totalPrice={totalPrice}
                       />
