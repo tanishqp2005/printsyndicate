@@ -2,9 +2,8 @@
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { CreditCard, Calendar, Banknote } from 'lucide-react';
+import { CreditCard, QrCode, Banknote } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   Select,
@@ -19,7 +18,7 @@ interface PaymentFormProps {
 }
 
 const PaymentForm: React.FC<PaymentFormProps> = ({ onSubmit }) => {
-  const [paymentMethod, setPaymentMethod] = useState<'card' | 'cash'>('card');
+  const [paymentMethod, setPaymentMethod] = useState<'upi' | 'cash'>('upi');
   const [loading, setLoading] = useState(false);
   const [paymentLocation, setPaymentLocation] = useState("");
 
@@ -36,10 +35,10 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ onSubmit }) => {
     
     setLoading(true);
     
-    // Simulate payment processing for card and cash
+    // Simulate payment processing for UPI and cash
     setTimeout(() => {
       setLoading(false);
-      toast.success(`${paymentMethod === 'card' ? 'Payment' : 'Order'} completed successfully!`);
+      toast.success(`${paymentMethod === 'upi' ? 'UPI Payment' : 'Cash on Delivery'} completed successfully!`);
       onSubmit();
     }, 1500);
   };
@@ -52,12 +51,12 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ onSubmit }) => {
         <div className="flex flex-col sm:flex-row gap-2 sm:space-x-4">
           <Button
             type="button"
-            variant={paymentMethod === 'card' ? 'default' : 'outline'}
-            onClick={() => setPaymentMethod('card')}
-            className={`flex-1 ${paymentMethod === 'card' ? 'bg-university-600 hover:bg-university-700' : ''}`}
+            variant={paymentMethod === 'upi' ? 'default' : 'outline'}
+            onClick={() => setPaymentMethod('upi')}
+            className={`flex-1 ${paymentMethod === 'upi' ? 'bg-university-600 hover:bg-university-700' : ''}`}
           >
-            <CreditCard className="mr-2 h-4 w-4" />
-            Credit Card
+            <QrCode className="mr-2 h-4 w-4" />
+            UPI
           </Button>
           
           <Button
@@ -72,54 +71,22 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ onSubmit }) => {
         </div>
       </div>
 
-      {paymentMethod === 'card' ? (
+      {paymentMethod === 'upi' ? (
         <Card>
           <CardContent className="pt-6 space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="cardName">Name on Card</Label>
-              <Input id="cardName" placeholder="John Smith" required />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="cardNumber">Card Number</Label>
+              <Label>UPI ID</Label>
               <div className="relative">
-                <Input
-                  id="cardNumber"
-                  placeholder="1234 5678 9012 3456"
-                  required
-                  maxLength={19}
-                  pattern="[0-9\s]{13,19}"
-                />
-                <CreditCard className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="expiryDate">Expiry Date</Label>
-                <div className="relative">
-                  <Input
-                    id="expiryDate"
-                    placeholder="MM/YY"
-                    required
-                    maxLength={5}
-                    pattern="[0-9]{2}/[0-9]{2}"
-                  />
-                  <Calendar className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="cvv">CVV</Label>
-                <Input
-                  id="cvv"
-                  placeholder="123"
-                  required
-                  maxLength={4}
-                  pattern="[0-9]{3,4}"
-                  type="password"
+                <input 
+                  type="text" 
+                  placeholder="Enter UPI ID" 
+                  className="w-full px-3 py-2 border rounded-md"
+                  required 
                 />
               </div>
+              <p className="text-sm text-gray-500 mt-2">
+                Your UPI ID will be used to process the payment.
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -155,7 +122,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ onSubmit }) => {
           disabled={loading || (paymentMethod === 'cash' && !paymentLocation)}
         >
           {loading ? 'Processing...' : `Complete ${
-            paymentMethod === 'card' ? 'Payment' : 'Order'
+            paymentMethod === 'upi' ? 'UPI Payment' : 'Cash on Delivery'
           }`}
         </Button>
       </div>
@@ -164,3 +131,4 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ onSubmit }) => {
 };
 
 export default PaymentForm;
+
