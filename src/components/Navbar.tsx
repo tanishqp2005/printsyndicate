@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Printer } from 'lucide-react';
+import { Printer, UserRound, ShoppingBag } from 'lucide-react';
 
 const Navbar = () => {
   return (
@@ -11,7 +11,21 @@ const Navbar = () => {
           <Printer className="h-6 w-6 text-university-700" />
           <span className="font-bold text-xl text-university-900">PrintSyndicate</span>
         </Link>
-        <div className="flex gap-3">
+        <div className="flex gap-3 items-center">
+          <Link
+            to="/orders"
+            className="flex items-center gap-1 px-3 py-2 text-gray-700 hover:text-university-700 transition-colors"
+          >
+            <ShoppingBag className="h-5 w-5" />
+            <span className="hidden sm:inline">Orders</span>
+          </Link>
+          <Link
+            to="/profile"
+            className="flex items-center gap-1 px-3 py-2 text-gray-700 hover:text-university-700 transition-colors"
+          >
+            <UserRound className="h-5 w-5" />
+            <span className="hidden sm:inline">Profile</span>
+          </Link>
           <Link
             to="/order"
             className="bg-university-600 hover:bg-university-700 text-white px-4 py-2 rounded-md transition-colors"

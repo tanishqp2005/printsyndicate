@@ -161,7 +161,7 @@ const OrderPage = () => {
                       <OrderSummary
                         fileName={selectedFile.name}
                         fileSize={selectedFile.size}
-                        printOptions={orderDetails.printOptions}
+                        printOptions={orderDetails.printOptions as PrintOptions}
                         totalPrice={totalPrice}
                       />
                     </div>

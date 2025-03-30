@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Printer, FileText, Clock, CreditCard, CheckCircle } from 'lucide-react';
@@ -51,11 +50,6 @@ const Index = () => {
                   <Link to="/order">
                     <Button size="lg" className="bg-white text-university-900 hover:bg-gray-100">
                       Start Printing Now
-                    </Button>
-                  </Link>
-                  <Link to="/pricing">
-                    <Button size="lg" variant="outline" className="text-white border-white hover:bg-white/10">
-                      View Pricing
                     </Button>
                   </Link>
                 </div>
