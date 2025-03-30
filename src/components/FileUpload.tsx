@@ -1,15 +1,16 @@
 
 import React, { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Files, Upload, AlertCircle, CheckCircle2, X } from 'lucide-react';
+import { Files, Upload, AlertCircle, CheckCircle2, X, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
 interface FileUploadProps {
   onFilesSelect: (files: File[]) => void;
+  onProceed: () => void;
 }
 
-const FileUpload: React.FC<FileUploadProps> = ({ onFilesSelect }) => {
+const FileUpload: React.FC<FileUploadProps> = ({ onFilesSelect, onProceed }) => {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isDragActive, setIsDragActive] = useState(false);
 
@@ -64,6 +65,14 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFilesSelect }) => {
     newFiles.splice(index, 1);
     setSelectedFiles(newFiles);
     onFilesSelect(newFiles);
+  };
+
+  const handleProceed = () => {
+    if (selectedFiles.length === 0) {
+      toast.error('Please upload at least one file before proceeding');
+      return;
+    }
+    onProceed();
   };
 
   return (
@@ -130,6 +139,16 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFilesSelect }) => {
               </div>
             </div>
           ))}
+          
+          <div className="pt-4">
+            <Button 
+              onClick={handleProceed}
+              className="w-full md:w-auto"
+              disabled={selectedFiles.length === 0}
+            >
+              Proceed to Details <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
         </div>
       )}
       

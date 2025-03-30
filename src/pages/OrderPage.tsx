@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
@@ -80,13 +79,11 @@ const OrderPage = () => {
     });
     
     setFileDetails(details);
-    
-    if (files.length > 0) {
-      setTimeout(() => {
-        setStep(2);
-      }, 500);
-    } else {
-      setStep(1);
+  };
+  
+  const proceedToDetails = () => {
+    if (selectedFiles.length > 0) {
+      setStep(2);
     }
   };
 
@@ -161,7 +158,10 @@ const OrderPage = () => {
                   <p className="text-gray-600 mb-6">
                     Please upload the PDF documents you want to print. We accept files up to 20MB in size each.
                   </p>
-                  <FileUpload onFilesSelect={handleFilesSelect} />
+                  <FileUpload 
+                    onFilesSelect={handleFilesSelect} 
+                    onProceed={proceedToDetails}
+                  />
                 </div>
               )}
               
