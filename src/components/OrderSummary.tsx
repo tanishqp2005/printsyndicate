@@ -26,6 +26,9 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
   printOptions, 
   totalPrice 
 }) => {
+  // Calculate per page cost
+  const perPageCost = pageCount > 0 ? (pageCount * 2).toFixed(2) : '0.00';
+
   return (
     <Card>
       <CardHeader>
@@ -91,15 +94,17 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
         </div>
         
         <div className="border-t border-gray-200 pt-4">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm text-gray-600">Base Price</span>
-            <span className="text-sm">$3.50</span>
-          </div>
+          {pageCount > 0 && (
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-sm text-gray-600">Page Cost (₹2 per page × {pageCount})</span>
+              <span className="text-sm">₹{perPageCost}</span>
+            </div>
+          )}
           
           {printOptions.color === 'color' && (
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm text-gray-600">Color Printing</span>
-              <span className="text-sm">$2.00</span>
+              <span className="text-sm">₹2.00</span>
             </div>
           )}
           
@@ -109,7 +114,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
                 {printOptions.binding === 'staple' ? 'Stapling' : 'Spiral Binding'}
               </span>
               <span className="text-sm">
-                ${printOptions.binding === 'staple' ? '0.50' : '3.00'}
+                ₹{printOptions.binding === 'staple' ? '0.50' : '3.00'}
               </span>
             </div>
           )}
@@ -120,7 +125,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
                 Additional Copies (×{parseInt(printOptions.copies) - 1})
               </span>
               <span className="text-sm">
-                ${((parseInt(printOptions.copies) - 1) * 3.50).toFixed(2)}
+                ₹{((parseInt(printOptions.copies) - 1) * (pageCount > 0 ? pageCount * 2 : 3.50)).toFixed(2)}
               </span>
             </div>
           )}
@@ -129,7 +134,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
         <div className="border-t border-gray-200 pt-4">
           <div className="flex justify-between items-center">
             <span className="font-medium">Total</span>
-            <span className="font-medium text-university-700">${totalPrice.toFixed(2)}</span>
+            <span className="font-medium text-university-700">₹{totalPrice.toFixed(2)}</span>
           </div>
         </div>
       </CardContent>

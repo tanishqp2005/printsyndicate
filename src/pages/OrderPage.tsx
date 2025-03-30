@@ -45,6 +45,7 @@ const OrderPage = () => {
   const [orderDetails, setOrderDetails] = useState<FormValues | null>(null);
   const [totalPrice, setTotalPrice] = useState(0);
   const [orderNumber, setOrderNumber] = useState('');
+  const [pageCount, setPageCount] = useState(10); // Simulated page count (in a real app, this would be extracted from the PDF)
 
   // Define default print options with all required properties
   const defaultPrintOptions: PrintOptions = {
@@ -57,13 +58,20 @@ const OrderPage = () => {
 
   const handleFileSelect = (file: File) => {
     setSelectedFile(file);
+    
+    // Simulate calculating page count from the file
+    // In a real application, you would use a PDF library to extract this information
+    const estimatedPageCount = Math.floor(file.size / 40000); // Rough estimate
+    setPageCount(Math.max(1, estimatedPageCount));
+    
     setTimeout(() => {
       setStep(2);
     }, 500);
   };
 
   const calculatePrice = (details: FormValues) => {
-    let price = 3.50; // Base price
+    // Base price calculated at 2 rupees per page
+    let price = pageCount * 2;
     
     // Add color printing price
     if (details.printOptions.color === 'color') {
@@ -93,7 +101,8 @@ const OrderPage = () => {
     console.log('Sending order details to stationery operator:', {
       file: selectedFile,
       details: data,
-      price: price
+      price: price,
+      pageCount: pageCount
     });
   };
 
