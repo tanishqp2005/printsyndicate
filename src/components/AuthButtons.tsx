@@ -31,7 +31,7 @@ const AuthButtons = () => {
   }
 
   return (
-    <div className="flex items-center">
+    <div className="flex items-center gap-2">
       <Link to="/signin">
         <Button 
           variant="outline" 
@@ -40,6 +40,12 @@ const AuthButtons = () => {
         >
           <LogIn className="h-4 w-4" />
           <span className="hidden sm:inline">Sign In</span>
+        </Button>
+      </Link>
+      <Link to="/signup">
+        <Button size="sm" className="flex items-center gap-1">
+          <UserCircle className="h-4 w-4" />
+          <span className="hidden sm:inline">Sign Up</span>
         </Button>
       </Link>
     </div>

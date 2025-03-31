@@ -4,7 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { Loader2, Mail } from 'lucide-react';
+import { UserPlus, Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -20,49 +20,46 @@ import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { toast } from 'sonner';
 
 const formSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z
     .string()
     .email('Please enter a valid email')
     .refine((email) => email.endsWith('@sakec.ac.in'), {
       message: 'Only @sakec.ac.in email addresses are allowed',
     }),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ['confirmPassword'],
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
 const SignUpPage = () => {
-  const { requestOTP } = useAuth();
+  const { signUp } = useAuth();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      name: '',
       email: '',
+      password: '',
+      confirmPassword: '',
     },
   });
 
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true);
-    try {
-      console.log("Requesting OTP for:", data.email);
-      const success = await requestOTP(data.email);
-      
-      if (success) {
-        toast.success("OTP sent successfully! Redirecting to verification page.");
-        // Navigate to signin with the email as state
-        navigate('/signin', { state: { email: data.email } });
-      } else {
-        toast.error("Failed to send OTP. Please try again.");
-      }
-    } catch (error) {
-      console.error("Error requesting OTP:", error);
-      toast.error("An error occurred. Please try again.");
-    } finally {
-      setIsSubmitting(false);
+    const success = await signUp(data.email, data.name, data.password);
+    setIsSubmitting(false);
+    
+    if (success) {
+      navigate('/');
     }
   };
 
@@ -86,6 +83,20 @@ const SignUpPage = () => {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
                 control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Full Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="John Doe" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
                 name="email"
                 render={({ field }) => (
                   <FormItem>
@@ -101,6 +112,34 @@ const SignUpPage = () => {
                 )}
               />
               
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <Input type="password" placeholder="••••••••" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirm Password</FormLabel>
+                    <FormControl>
+                      <Input type="password" placeholder="••••••••" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
               <Button
                 type="submit"
                 className="w-full"
@@ -109,12 +148,12 @@ const SignUpPage = () => {
                 {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Sending OTP...
+                    Creating Account...
                   </>
                 ) : (
                   <>
-                    <Mail className="mr-2 h-4 w-4" />
-                    Get OTP
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    Sign Up
                   </>
                 )}
               </Button>

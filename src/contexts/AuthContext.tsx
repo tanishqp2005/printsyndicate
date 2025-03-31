@@ -13,8 +13,8 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  requestOTP: (email: string) => Promise<boolean>;
-  verifyOTP: (email: string, otp: string) => Promise<boolean>;
+  signIn: (email: string, password: string) => Promise<boolean>;
+  signUp: (email: string, name: string, password: string) => Promise<boolean>;
   signOut: () => void;
 }
 
@@ -42,12 +42,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(false);
   }, []);
 
-  // Generate a 6-digit OTP
-  const generateOTP = () => {
-    return Math.floor(100000 + Math.random() * 900000).toString();
+  const signIn = async (email: string, password: string): Promise<boolean> => {
+    setIsLoading(true);
+    try {
+      // In a real application, this would be an API call to authenticate
+      // For now, we'll simulate a successful login if the email is in our mock DB
+      const storedUsers = JSON.parse(localStorage.getItem('users') || '[]');
+      const user = storedUsers.find((u: any) => 
+        u.email === email && u.password === password
+      );
+      
+      if (!user) {
+        toast.error('Invalid email or password');
+        setIsLoading(false);
+        return false;
+      }
+      
+      // Remove password before storing in state
+      const { password: _, ...userWithoutPassword } = user;
+      setUser(userWithoutPassword);
+      localStorage.setItem('user', JSON.stringify(userWithoutPassword));
+      toast.success('Signed in successfully');
+      setIsLoading(false);
+      return true;
+    } catch (error) {
+      console.error('Sign in error:', error);
+      toast.error('Failed to sign in');
+      setIsLoading(false);
+      return false;
+    }
   };
 
-  const requestOTP = async (email: string): Promise<boolean> => {
+  const signUp = async (email: string, name: string, password: string): Promise<boolean> => {
     setIsLoading(true);
     try {
       // Validate email domain
@@ -57,100 +83,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return false;
       }
 
-      // Check if user exists or create a new user account
+      // In a real application, this would be an API call to register
+      // For now, we'll simulate storing the user in localStorage
       const storedUsers = JSON.parse(localStorage.getItem('users') || '[]');
-      const existingUser = storedUsers.find((u: any) => u.email === email);
       
-      // Generate OTP and store it
-      const otp = generateOTP();
-      const otpStorage = JSON.parse(localStorage.getItem('otps') || '{}');
-      otpStorage[email] = {
-        code: otp,
-        expiresAt: Date.now() + 10 * 60 * 1000, // OTP valid for 10 minutes
+      // Check if email already exists
+      if (storedUsers.some((user: any) => user.email === email)) {
+        toast.error('Email already registered');
+        setIsLoading(false);
+        return false;
+      }
+      
+      const newUser = {
+        id: `user-${Date.now()}`,
+        email,
+        name,
+        password // In a real app, this would be hashed
       };
-      localStorage.setItem('otps', JSON.stringify(otpStorage));
       
-      // In a real application, this would send an email with the OTP
-      // For demo purposes, we'll show it in a toast
-      toast.info(`OTP sent to ${email}: ${otp}`);
-      console.log(`OTP for ${email}: ${otp}`); // For testing purposes
+      storedUsers.push(newUser);
+      localStorage.setItem('users', JSON.stringify(storedUsers));
       
-      setIsLoading(false);
-      return true;
-    } catch (error) {
-      console.error('Request OTP error:', error);
-      toast.error('Failed to send OTP');
-      setIsLoading(false);
-      return false;
-    }
-  };
-
-  const verifyOTP = async (email: string, otp: string): Promise<boolean> => {
-    setIsLoading(true);
-    try {
-      // Validate email domain again as a safety check
-      if (!email.endsWith('@sakec.ac.in')) {
-        toast.error('Only @sakec.ac.in email addresses are allowed');
-        setIsLoading(false);
-        return false;
-      }
-
-      // Check OTP validity
-      const otpStorage = JSON.parse(localStorage.getItem('otps') || '{}');
-      const storedOTP = otpStorage[email];
-      
-      if (!storedOTP) {
-        toast.error('No OTP requested for this email');
-        setIsLoading(false);
-        return false;
-      }
-      
-      if (Date.now() > storedOTP.expiresAt) {
-        toast.error('OTP has expired, please request a new one');
-        // Remove expired OTP
-        delete otpStorage[email];
-        localStorage.setItem('otps', JSON.stringify(otpStorage));
-        setIsLoading(false);
-        return false;
-      }
-      
-      if (storedOTP.code !== otp) {
-        toast.error('Invalid OTP, please try again');
-        setIsLoading(false);
-        return false;
-      }
-      
-      // OTP is valid, clear it from storage
-      delete otpStorage[email];
-      localStorage.setItem('otps', JSON.stringify(otpStorage));
-      
-      // Check if user exists or create a new one
-      const storedUsers = JSON.parse(localStorage.getItem('users') || '[]');
-      let user = storedUsers.find((u: any) => u.email === email);
-      
-      if (!user) {
-        // Create new user with email as name (can be updated later)
-        const username = email.split('@')[0];
-        user = {
-          id: `user-${Date.now()}`,
-          email,
-          name: username,
-        };
-        storedUsers.push(user);
-        localStorage.setItem('users', JSON.stringify(storedUsers));
-      }
-      
-      // Set user session
-      const { password: _, ...userWithoutPassword } = user;
+      // Remove password before storing in state
+      const { password: _, ...userWithoutPassword } = newUser;
       setUser(userWithoutPassword);
       localStorage.setItem('user', JSON.stringify(userWithoutPassword));
       
-      toast.success('Signed in successfully');
+      toast.success('Account created successfully');
       setIsLoading(false);
       return true;
     } catch (error) {
-      console.error('Verify OTP error:', error);
-      toast.error('Failed to verify OTP');
+      console.error('Sign up error:', error);
+      toast.error('Failed to create account');
       setIsLoading(false);
       return false;
     }
@@ -169,8 +133,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         user,
         isAuthenticated: !!user,
         isLoading,
-        requestOTP,
-        verifyOTP,
+        signIn,
+        signUp,
         signOut
       }}
     >
