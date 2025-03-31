@@ -9,12 +9,15 @@ const AuthButtons = () => {
   const { user, isAuthenticated, signOut } = useAuth();
 
   if (isAuthenticated && user) {
+    // Get the user's name from the user metadata
+    const userName = user.user_metadata?.name || user.email?.split('@')[0] || 'User';
+    
     return (
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-2">
           <UserCircle className="h-5 w-5 text-university-700" />
           <span className="hidden md:inline text-sm font-medium truncate max-w-[140px]">
-            {user.name}
+            {userName}
           </span>
         </div>
         <Button 
