@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -24,6 +24,7 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { toast } from 'sonner';
 
 // Email form schema
 const emailFormSchema = z.object({
@@ -46,9 +47,20 @@ type OTPFormValues = z.infer<typeof otpFormSchema>;
 const SignInPage = () => {
   const { requestOTP, verifyOTP } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [emailVerificationStep, setEmailVerificationStep] = useState(true);
   const [email, setEmail] = useState('');
+
+  // Check for email in location state (from SignUpPage)
+  useEffect(() => {
+    const locationState = location.state as { email?: string };
+    if (locationState?.email) {
+      setEmail(locationState.email);
+      setEmailVerificationStep(false);
+      toast.info(`Enter the OTP sent to ${locationState.email}`);
+    }
+  }, [location]);
 
   // Email form
   const emailForm = useForm<EmailFormValues>({
@@ -68,29 +80,62 @@ const SignInPage = () => {
 
   const onEmailSubmit = async (data: EmailFormValues) => {
     setIsSubmitting(true);
-    const success = await requestOTP(data.email);
-    setIsSubmitting(false);
-    
-    if (success) {
-      setEmail(data.email);
-      setEmailVerificationStep(false);
+    try {
+      console.log("Requesting OTP for:", data.email);
+      const success = await requestOTP(data.email);
+      
+      if (success) {
+        setEmail(data.email);
+        setEmailVerificationStep(false);
+        toast.success(`OTP sent to ${data.email}`);
+      } else {
+        toast.error("Failed to send OTP. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error requesting OTP:", error);
+      toast.error("An error occurred. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const onOTPSubmit = async (data: OTPFormValues) => {
     setIsSubmitting(true);
-    const success = await verifyOTP(email, data.otp);
-    setIsSubmitting(false);
-    
-    if (success) {
-      navigate('/');
+    try {
+      console.log("Verifying OTP:", data.otp, "for email:", email);
+      const success = await verifyOTP(email, data.otp);
+      
+      if (success) {
+        toast.success("Successfully verified! Redirecting...");
+        navigate('/');
+      } else {
+        toast.error("Invalid OTP. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error verifying OTP:", error);
+      toast.error("An error occurred during verification. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleResendOTP = async () => {
     setIsSubmitting(true);
-    await requestOTP(email);
-    setIsSubmitting(false);
+    try {
+      console.log("Resending OTP to:", email);
+      const success = await requestOTP(email);
+      
+      if (success) {
+        toast.success(`OTP resent to ${email}`);
+      } else {
+        toast.error("Failed to resend OTP. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error resending OTP:", error);
+      toast.error("An error occurred. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -149,6 +194,13 @@ const SignInPage = () => {
                     </>
                   )}
                 </Button>
+                
+                <p className="text-center text-sm text-gray-600">
+                  Don't have an account?{' '}
+                  <Link to="/signup" className="font-medium text-university-600 hover:text-university-500">
+                    Sign up
+                  </Link>
+                </p>
               </form>
             </Form>
           ) : (

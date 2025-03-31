@@ -20,6 +20,7 @@ import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { toast } from 'sonner';
 
 const formSchema = z.object({
   email: z
@@ -46,11 +47,22 @@ const SignUpPage = () => {
 
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true);
-    const success = await requestOTP(data.email);
-    setIsSubmitting(false);
-    
-    if (success) {
-      navigate('/signin', { state: { email: data.email } });
+    try {
+      console.log("Requesting OTP for:", data.email);
+      const success = await requestOTP(data.email);
+      
+      if (success) {
+        toast.success("OTP sent successfully! Redirecting to verification page.");
+        // Navigate to signin with the email as state
+        navigate('/signin', { state: { email: data.email } });
+      } else {
+        toast.error("Failed to send OTP. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error requesting OTP:", error);
+      toast.error("An error occurred. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
