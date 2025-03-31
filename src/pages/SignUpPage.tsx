@@ -59,7 +59,8 @@ const SignUpPage = () => {
     setIsSubmitting(false);
     
     if (success) {
-      navigate('/');
+      // Redirect to sign in page after showing verification message
+      navigate('/signin');
     }
   };
 
@@ -105,7 +106,7 @@ const SignUpPage = () => {
                       <Input placeholder="your.email@sakec.ac.in" {...field} />
                     </FormControl>
                     <FormDescription>
-                      Only @sakec.ac.in email addresses are allowed
+                      Only @sakec.ac.in email addresses are allowed. A verification email will be sent to this address.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
